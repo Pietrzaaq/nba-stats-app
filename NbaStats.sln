@@ -1,0 +1,21 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{DE0D68DE-9CD8-4433-95B8-D3DC01DF7549}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NbaStats.Domain", "src\NbaStats.Domain\NbaStats.Domain.csproj", "{78FC6E69-3F92-47B8-8E61-B03498123CB6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{78FC6E69-3F92-47B8-8E61-B03498123CB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78FC6E69-3F92-47B8-8E61-B03498123CB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78FC6E69-3F92-47B8-8E61-B03498123CB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78FC6E69-3F92-47B8-8E61-B03498123CB6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{78FC6E69-3F92-47B8-8E61-B03498123CB6} = {DE0D68DE-9CD8-4433-95B8-D3DC01DF7549}
+	EndGlobalSection
+EndGlobal
