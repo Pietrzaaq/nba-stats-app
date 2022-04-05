@@ -1,14 +1,18 @@
 ﻿using System;
+using System.ComponentModel.DataAnnotations;
+using NbaStats.Domain.ValueObjects;
 
 namespace NbaStats.Domain.Entities
 {
     public class Game
     {
+        [Key]
+        [Required]
         public int GameId { get; set; }
         public int ApiGameId { get; set; }
         public int? Season { get; set; }
         public int? SeasonType { get; set; }
-        public string Status { get; set; }
+        public Status Status { get; set; }
         public DateTime? Day { get; set; }
         public DateTime? DateTime { get; set; }
         public string AwayTeam { get; set; }
@@ -24,11 +28,6 @@ namespace NbaStats.Domain.Entities
         public DateTime? Updated { get; set; }
         public string Quarter { get; set; }
         public double? PointSpread { get; set; }
-        public int? AwayTeamMoneyLine { get; set; }
-        public int? HomeTeamMoneyLine { get; set; }
-        public int? GlobalGameId { get; set; }
-        public int? GlobalAwayTeamId { get; set; }
-        public int? GlobalHomeTeamId { get; set; }
         public int? PointSpreadAwayTeamMoneyLine { get; set; }
         public int? PointSpreadHomeTeamMoneyLine { get; set; }
         public string LastPlay { get; set; }
@@ -40,5 +39,14 @@ namespace NbaStats.Domain.Entities
 
         public virtual Team AwayTeamNavigation { get; set; }
         public virtual Team HomeTeamNavigation { get; set; }
+
+        private Game()
+        {
+        }
+
+        public void ChangeStatus(string value)
+        {
+            Status.SetStatus(value);
+        }
     }
 }

@@ -6,7 +6,10 @@ namespace NbaStats.Domain.Repositories
 {
     public interface IGameRepository
     {
-        Task AddAsync(Game game);
+        Task<Game> GetAsync(int id);
+        Task<bool> ExistsAsync(int id);
         Task<IReadOnlyList<Game>> BrowseAsync();
+        Task AddAsync(Game game);
+        Task UpdateAsync(Game game);
     }
 }

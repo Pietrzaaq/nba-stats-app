@@ -4,6 +4,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{DE0D68DE-9CD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NbaStats.Domain", "src\NbaStats.Domain\NbaStats.Domain.csproj", "{78FC6E69-3F92-47B8-8E61-B03498123CB6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NbaStats.Application", "src\NbaStats.Application\NbaStats.Application.csproj", "{9651FBF2-EEEC-4C3A-B4B6-2637108577EA}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{31D621E7-F6F1-40B6-9C3B-DB1A6ED07B46}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NbaStats.Worker", "src\NbaStats.Worker\NbaStats.Worker.csproj", "{4775D2B1-5197-4B1D-827E-583305292CA7}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -14,8 +20,18 @@ Global
 		{78FC6E69-3F92-47B8-8E61-B03498123CB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{78FC6E69-3F92-47B8-8E61-B03498123CB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{78FC6E69-3F92-47B8-8E61-B03498123CB6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9651FBF2-EEEC-4C3A-B4B6-2637108577EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9651FBF2-EEEC-4C3A-B4B6-2637108577EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9651FBF2-EEEC-4C3A-B4B6-2637108577EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9651FBF2-EEEC-4C3A-B4B6-2637108577EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4775D2B1-5197-4B1D-827E-583305292CA7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4775D2B1-5197-4B1D-827E-583305292CA7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4775D2B1-5197-4B1D-827E-583305292CA7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4775D2B1-5197-4B1D-827E-583305292CA7}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{78FC6E69-3F92-47B8-8E61-B03498123CB6} = {DE0D68DE-9CD8-4433-95B8-D3DC01DF7549}
+		{9651FBF2-EEEC-4C3A-B4B6-2637108577EA} = {DE0D68DE-9CD8-4433-95B8-D3DC01DF7549}
+		{4775D2B1-5197-4B1D-827E-583305292CA7} = {DE0D68DE-9CD8-4433-95B8-D3DC01DF7549}
 	EndGlobalSection
 EndGlobal
