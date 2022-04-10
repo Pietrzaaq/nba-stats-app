@@ -7,5 +7,6 @@
         "DOTNET_ENVIRONMENT": "Development"
       }
     }
-  }
+  },
+  "connectionString": "Server=localhost;Database=NbaDatabase;Trusted_Connection=True"
 }

@@ -1,18 +1,15 @@
 ﻿using System;
-using System.ComponentModel.DataAnnotations;
 using NbaStats.Domain.ValueObjects;
 
 namespace NbaStats.Domain.Entities
 {
     public class Game
     {
-        [Key]
-        [Required]
         public int GameId { get; set; }
         public int ApiGameId { get; set; }
         public int? Season { get; set; }
         public int? SeasonType { get; set; }
-        public Status Status { get; set; }
+        public Status Status { get; private set; }
         public DateTime? Day { get; set; }
         public DateTime? DateTime { get; set; }
         public string AwayTeam { get; set; }

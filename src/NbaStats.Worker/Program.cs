@@ -1,9 +1,29 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using NbaStats.Worker;
+using Serilog;
 
-IHost host = Host.CreateDefaultBuilder(args)
-    .ConfigureServices(services => { services.AddHostedService<Worker>(); })
-    .Build();
 
-await host.RunAsync();
+namespace NbaStats.Worker
+{
+    public class Program
+    {
+        public static void Main(string[] args)
+        {
+            Log.Logger = new LoggerConfiguration()
+                .Enrich.FromLogContext()
+                .WriteTo.Console()
+                .CreateLogger();
+            
+            CreateHostBuilder(args).Build().Run();
+        }
+
+        public static IHostBuilder CreateHostBuilder(string[] args) =>
+            Host.CreateDefaultBuilder(args)
+                .UseSerilog()
+                .ConfigureServices((hostContext, services) =>
+                {
+                    services.AddHostedService<DataService>();
+                });
+        
+    }  
+}
