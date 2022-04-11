@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NbaStats.Worker.Jobs;
@@ -13,12 +14,14 @@ namespace NbaStats.Worker
 {
     public class DataService : BackgroundService
     {
+        private readonly IConfiguration _configuration;
         private readonly ILogger<DataService> _logger;
         private readonly IScheduler _scheduler;
         private HttpClient _client;
 
-        public DataService(ILogger<DataService> logger)
+        public DataService(IConfiguration configuration, ILogger<DataService> logger)
         {
+            _configuration = configuration;
             _logger = logger;
             NameValueCollection props = new NameValueCollection
             {
@@ -72,6 +75,7 @@ namespace NbaStats.Worker
         {
             var jobData = new JobDataMap();
             jobData.Put("httpClient", _client);
+            jobData.Put("configuration", _configuration);
             
             IJobDetail job = JobBuilder.Create<ExampleJob>()
                 .UsingJobData(jobData)
@@ -82,7 +86,7 @@ namespace NbaStats.Worker
                 .WithIdentity("trigger1", "group1")
                 .StartNow()
                 .WithSimpleSchedule(x => x
-                    .WithIntervalInSeconds(10)
+                    .WithIntervalInMinutes(10)
                     .RepeatForever())
                 .Build();
 

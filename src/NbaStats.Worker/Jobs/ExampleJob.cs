@@ -1,9 +1,11 @@
 ﻿using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using NbaStats.Worker.Models;
 using Newtonsoft.Json;
 using Quartz;
 using Serilog;
+using NbaStats;
 
 namespace NbaStats.Worker.Jobs
 {
@@ -13,10 +15,14 @@ namespace NbaStats.Worker.Jobs
 
         public Task Execute(IJobExecutionContext context)
         {
-            var manager = new DbManager();
              JobDataMap dataMap = context.MergedJobDataMap;
              HttpClient client = (HttpClient) dataMap["httpClient"];
+             IConfiguration configuration = (IConfiguration) dataMap["configuration"];
 
+             var dbManager = new DbManager(configuration);
+             
+             dbManager.GetGames();
+             
              var result = JsonConvert.DeserializeObject(ResponseJson);
 
              Log.Information("Executing the HelloJob with serilog");

@@ -9,7 +9,8 @@ namespace NbaStats.Domain.Entities
         public int ApiGameId { get; set; }
         public int? Season { get; set; }
         public int? SeasonType { get; set; }
-        public Status Status { get; private set; }
+        /*public Status Status { get; private set; }*/
+        public string Status { get; set; }
         public DateTime? Day { get; set; }
         public DateTime? DateTime { get; set; }
         public string AwayTeam { get; set; }
@@ -41,9 +42,9 @@ namespace NbaStats.Domain.Entities
         {
         }
 
-        public void ChangeStatus(string value)
+        /*public void ChangeStatus(string value)
         {
             Status.SetStatus(value);
-        }
+        }*/
     }
 }
