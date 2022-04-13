@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using NbaStats.Worker.Jobs;
 using Quartz;
 using Quartz.Impl;
+using Quartz.Impl.Triggers;
 
 namespace NbaStats.Worker
 {
@@ -17,7 +18,7 @@ namespace NbaStats.Worker
         private readonly IConfiguration _configuration;
         private readonly ILogger<DataService> _logger;
         private readonly IScheduler _scheduler;
-        private HttpClient _client;
+        private static HttpClient _client;
 
         public DataService(IConfiguration configuration, ILogger<DataService> logger)
         {
@@ -37,6 +38,7 @@ namespace NbaStats.Worker
         public override Task StartAsync(CancellationToken cancellationToken)
         {
             _client = new HttpClient();
+            _client.BaseAddress = new Uri("https://github.com/Pietrzaaq/nba-stats-app");
             return base.StartAsync(cancellationToken);
         }
 
@@ -57,7 +59,7 @@ namespace NbaStats.Worker
             }
             catch (Exception e)
             {
-                _logger.LogError(e,"Error occured while starting the _scheduler");
+                _logger.LogError(e,"Error occured while starting the Quartz Scheduler");
                 throw;
             }
             
@@ -68,11 +70,14 @@ namespace NbaStats.Worker
         {
             _scheduler.Start().ConfigureAwait(false).GetAwaiter().GetResult();
 
-            ScheduleJobs();
+            ScheduleExampleJob();
+            ScheduleInitTeamsJob();
         }
         
-        public void ScheduleJobs()
+        public void ScheduleExampleJob()
         {
+            _logger.LogInformation("Starting ExampleJob...");
+            
             var jobData = new JobDataMap();
             jobData.Put("httpClient", _client);
             jobData.Put("configuration", _configuration);
@@ -86,11 +91,36 @@ namespace NbaStats.Worker
                 .WithIdentity("trigger1", "group1")
                 .StartNow()
                 .WithSimpleSchedule(x => x
-                    .WithIntervalInMinutes(10)
+                    .WithIntervalInSeconds(60)
                     .RepeatForever())
                 .Build();
 
             // Tell quartz to schedule the job using our trigger
+            _scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
+        }
+
+        public void ScheduleInitTeamsJob()
+        {
+            _logger.LogInformation("Starting InitTeamsJob");
+            
+            var jobData = new JobDataMap();
+            jobData.Put("httpClient", _client);
+            jobData.Put("configuration", _configuration);
+
+            IJobDetail job = JobBuilder.Create<InitTeamsJob>()
+                .UsingJobData(jobData)
+                .WithIdentity("InitTeamsJob", "InitGroup")
+                .Build();
+            
+            var trigger = TriggerBuilder.Create()
+                .WithIdentity("InitTeamsTrigger", "InitGroup")
+                .WithSimpleSchedule(x => x
+                    .WithRepeatCount(0)
+                    .WithIntervalInSeconds(120)
+                )
+                .StartAt(DateTimeOffset.Now.AddMinutes(1))
+                .Build();
+            
             _scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
         }
         

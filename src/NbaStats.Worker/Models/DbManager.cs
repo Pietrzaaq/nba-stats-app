@@ -19,7 +19,7 @@ namespace NbaStats.Worker.Models
             _connectionString = GetConnectionString();
         }
         
-        private string GetConnectionString()
+        public string GetConnectionString()
         {
             return _configuration[$"database:{nameof(DatabaseOptions.ConnectionString)}"];
         }
