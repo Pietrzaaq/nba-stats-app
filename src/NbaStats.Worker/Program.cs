@@ -1,5 +1,9 @@
+using System;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using NbaStats.Worker.Models;
 using Serilog;
 
 
@@ -24,6 +28,5 @@ namespace NbaStats.Worker
                 {
                     services.AddHostedService<DataService>();
                 });
-        
     }  
 }

@@ -1,13 +1,11 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
 using NbaStats.Domain.Entities;
 
 #nullable disable
 
 namespace NbaStats.Worker.Models
 {
-    public partial class NbaDatabaseContext : DbContext
+public partial class NbaDatabaseContext : DbContext
     {
         public NbaDatabaseContext()
         {
@@ -18,25 +16,23 @@ namespace NbaStats.Worker.Models
         {
         }
 
-
-        public virtual System.Data.Entity.DbSet<Game> Games { get; set; }
-        public virtual System.Data.Entity.DbSet<Player> Players { get; set; }
-        public virtual System.Data.Entity.DbSet<Quarter> Quarters { get; set; }
-        public virtual System.Data.Entity.DbSet<Team> Teams { get; set; }
-
+        public virtual DbSet<Game> Games { get; set; }
+        public virtual DbSet<Player> Players { get; set; }
+        public virtual DbSet<Quarter> Quarters { get; set; }
+        public virtual DbSet<Team> Teams { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
-                optionsBuilder.UseSqlServer("Data Source=localhost; Initial Catalog=NbaDatabase; User Id=user; Password=12345");
+                optionsBuilder.UseSqlServer("Data Source=localhost; Initial Catalog=NbaDatabase; TrustServerCertificate=True; User Id=user; Password=12345");
             }
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.HasAnnotation("Relational:Collation", "Polish_CI_AS");
-            
+
             modelBuilder.Entity<Game>(entity =>
             {
                 entity.ToTable("Games", "StatsManagement");
@@ -213,7 +209,7 @@ namespace NbaStats.Worker.Models
                     .IsUnicode(false);
 
                 entity.HasOne(d => d.Game)
-                    .WithMany(p => Quarters)
+                    .WithMany(p => p.Quarters)
                     .HasForeignKey(d => d.GameId)
                     .OnDelete(DeleteBehavior.ClientSetNull)
                     .HasConstraintName("FK_Quarters_GameId");
@@ -273,10 +269,9 @@ namespace NbaStats.Worker.Models
 
                 entity.Property(e => e.WikipediaWordMarkUrl).IsUnicode(false);
             });
-            
+
             OnModelCreatingPartial(modelBuilder);
         }
-
         partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
 }

@@ -9,7 +9,6 @@ using Microsoft.Extensions.Logging;
 using NbaStats.Worker.Jobs;
 using Quartz;
 using Quartz.Impl;
-using Quartz.Impl.Triggers;
 
 namespace NbaStats.Worker
 {
@@ -22,6 +21,7 @@ namespace NbaStats.Worker
 
         public DataService(IConfiguration configuration, ILogger<DataService> logger)
         {
+            //Get services and configure scheduler
             _configuration = configuration;
             _logger = logger;
             NameValueCollection props = new NameValueCollection
@@ -37,8 +37,9 @@ namespace NbaStats.Worker
 
         public override Task StartAsync(CancellationToken cancellationToken)
         {
+            //Initialize static instance of HttpClient
             _client = new HttpClient();
-            _client.BaseAddress = new Uri("https://github.com/Pietrzaaq/nba-stats-app");
+            
             return base.StartAsync(cancellationToken);
         }
 
@@ -70,14 +71,19 @@ namespace NbaStats.Worker
         {
             _scheduler.Start().ConfigureAwait(false).GetAwaiter().GetResult();
 
+            //Schedule jobs
             ScheduleExampleJob();
-            ScheduleInitTeamsJob();
+            ScheduleInitTeamsAndPlayersJob();
+        }
+        
+        public void StopScheduler()
+        {
+            _logger.LogInformation("Stopping scheduler...");
+            _scheduler.Shutdown().ConfigureAwait(false).GetAwaiter().GetResult();
         }
         
         public void ScheduleExampleJob()
         {
-            _logger.LogInformation("Starting ExampleJob...");
-            
             var jobData = new JobDataMap();
             jobData.Put("httpClient", _client);
             jobData.Put("configuration", _configuration);
@@ -94,40 +100,61 @@ namespace NbaStats.Worker
                     .WithIntervalInSeconds(60)
                     .RepeatForever())
                 .Build();
-
-            // Tell quartz to schedule the job using our trigger
+            
             _scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
+            _logger.LogInformation("ExampleJob has been scheduled");
         }
 
-        public void ScheduleInitTeamsJob()
+        public void ScheduleInitTeamsAndPlayersJob()
         {
-            _logger.LogInformation("Starting InitTeamsJob");
-            
             var jobData = new JobDataMap();
             jobData.Put("httpClient", _client);
             jobData.Put("configuration", _configuration);
 
-            IJobDetail job = JobBuilder.Create<InitTeamsJob>()
+            IJobDetail job = JobBuilder.Create<InitTeamsAndPlayersJob>()
                 .UsingJobData(jobData)
-                .WithIdentity("InitTeamsJob", "InitGroup")
+                .WithIdentity("InitTeamsAndPlayersJob", "InitGroup")
                 .Build();
             
             var trigger = TriggerBuilder.Create()
                 .WithIdentity("InitTeamsTrigger", "InitGroup")
                 .WithSimpleSchedule(x => x
                     .WithRepeatCount(0)
-                    .WithIntervalInSeconds(120)
+                    .WithIntervalInSeconds(10)
                 )
-                .StartAt(DateTimeOffset.Now.AddMinutes(1))
+                .StartAt(DateTimeOffset.Now.AddSeconds(10))
                 .Build();
             
             _scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
+            _logger.LogInformation("InitTeamsAndPlayersJob has been scheduled");
         }
         
-        public void StopScheduler()
+        public void ScheduleInitPlayersJob()
         {
-            _logger.LogInformation("Stopping scheduler...");
-            _scheduler.Shutdown().ConfigureAwait(false).GetAwaiter().GetResult();
+            //Use JobDataMap function to pass object to Job instances
+            var jobData = new JobDataMap();
+            jobData.Put("httpClient", _client);
+            jobData.Put("configuration", _configuration);
+
+            //Build job and assign it to the group
+            IJobDetail job = JobBuilder.Create<InitTeamsAndPlayersJob>()
+                .UsingJobData(jobData)
+                .WithIdentity("InitTeamsAndPlayersJob", "InitGroup")
+                .Build();
+            
+            //Create trigger for the job and set interval 
+            var trigger = TriggerBuilder.Create()
+                .WithIdentity("InitTeamsTrigger", "InitGroup")
+                .WithSimpleSchedule(x => x
+                    .WithRepeatCount(0)
+                    .WithIntervalInSeconds(10)
+                )
+                .StartAt(DateTimeOffset.Now.AddSeconds(10))
+                .Build();
+            
+            _scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
+            _logger.LogInformation("InitTeamsAndPlayersJob has been scheduled");
         }
+
     }
 }
