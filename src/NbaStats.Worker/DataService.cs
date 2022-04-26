@@ -18,7 +18,7 @@ namespace NbaStats.Worker
         private readonly ILogger<DataService> _logger;
         private readonly IScheduler _scheduler;
         private static HttpClient _client;
-
+        
         public DataService(IConfiguration configuration, ILogger<DataService> logger)
         {
             //Get services and configure scheduler
@@ -63,6 +63,10 @@ namespace NbaStats.Worker
                 _logger.LogError(e,"Error occured while starting the Quartz Scheduler");
                 throw;
             }
+
+            var currentJobs = _scheduler.GetCurrentlyExecutingJobs().Result;
+            _scheduler.GetTrigger(new TriggerKey("InitTeamsAndPlayersJob"));
+            _scheduler.GetTrigger(new TriggerKey("InitTeamsTrigger"));
             
             return Task.CompletedTask;
         }
@@ -74,6 +78,7 @@ namespace NbaStats.Worker
             //Schedule jobs
             ScheduleExampleJob();
             ScheduleInitTeamsAndPlayersJob();
+            ScheduleInitGamesJob();
         }
         
         public void StopScheduler()
@@ -129,7 +134,7 @@ namespace NbaStats.Worker
             _logger.LogInformation("InitTeamsAndPlayersJob has been scheduled");
         }
         
-        public void ScheduleInitPlayersJob()
+        public void ScheduleInitGamesJob()
         {
             //Use JobDataMap function to pass object to Job instances
             var jobData = new JobDataMap();
@@ -137,19 +142,19 @@ namespace NbaStats.Worker
             jobData.Put("configuration", _configuration);
 
             //Build job and assign it to the group
-            IJobDetail job = JobBuilder.Create<InitTeamsAndPlayersJob>()
+            IJobDetail job = JobBuilder.Create<InitGamesForSeasonJob>()
                 .UsingJobData(jobData)
-                .WithIdentity("InitTeamsAndPlayersJob", "InitGroup")
+                .WithIdentity("InitGamesJob", "InitGroup")
                 .Build();
             
             //Create trigger for the job and set interval 
             var trigger = TriggerBuilder.Create()
-                .WithIdentity("InitTeamsTrigger", "InitGroup")
+                .WithIdentity("InitGamesTrigger", "InitGroup")
                 .WithSimpleSchedule(x => x
                     .WithRepeatCount(0)
                     .WithIntervalInSeconds(10)
                 )
-                .StartAt(DateTimeOffset.Now.AddSeconds(10))
+                .StartAt(DateTimeOffset.Now.AddSeconds(30))
                 .Build();
             
             _scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();

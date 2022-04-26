@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+    <PropertyGroup>
+        <TargetFramework>net6.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\NbaStats.Application\NbaStats.Application.csproj" />
+        <ProjectReference Include="..\NbaStats.Domain\NbaStats.Domain.csproj" />
+        <ProjectReference Include="..\NbaStats.Infrastructure\NbaStats.Infrastructure.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="PageClasses" />
+    </ItemGroup>
+</Project>

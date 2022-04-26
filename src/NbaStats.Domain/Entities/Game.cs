@@ -22,7 +22,7 @@ namespace NbaStats.Domain.Entities
         public int AwayTeamId { get; set; }
         public int HomeTeamId { get; set; }
         public int? StadiumId { get; set; }
-        public string Channel { get; set; }
+        public string? Channel { get; set; }
         public int? AwayTeamScore { get; set; }
         public int? HomeTeamScore { get; set; }
         public DateTime? Updated { get; set; }
@@ -34,8 +34,9 @@ namespace NbaStats.Domain.Entities
         public int? GlobalHomeTeamId { get; set; }
         public int? PointSpreadAwayTeamMoneyLine { get; set; }
         public int? PointSpreadHomeTeamMoneyLine { get; set; }
-        public string LastPlay { get; set; }
+        public string? LastPlay { get; set; }
         public bool? IsClosed { get; set; }
+        public DateTime? GameEndDateTime { get; set; }
         public int? HomeRotationNumber { get; set; }
         public int? AwayRotationNumber { get; set; }
         public bool? NeutralVenue { get; set; }

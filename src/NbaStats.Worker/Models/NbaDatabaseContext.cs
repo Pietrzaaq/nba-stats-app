@@ -53,6 +53,10 @@ public partial class NbaDatabaseContext : DbContext
                 entity.Property(e => e.DateTimeUtc)
                     .HasColumnType("datetime")
                     .HasColumnName("DateTimeUTC");
+                
+                entity.Property(e => e.GameEndDateTime)
+                    .HasColumnType("datetime")
+                    .HasColumnName("GameEndDateTime");
 
                 entity.Property(e => e.Day).HasColumnType("date");
 

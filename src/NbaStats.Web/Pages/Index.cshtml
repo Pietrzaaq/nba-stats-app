@@ -1,0 +1,222 @@
+﻿@page
+@using System
+@model NbaStats.Web.Pages.IndexModel
+@{
+    ViewData["Title"] = "Home page";
+}
+
+<div class="container-fluid date-picker">
+    <a class="date-picker-arrow" asp-page="./Index" asp-route-date="@(Model.Date != null ? Model.Date.Value.AddDays(-1).ToString("yyyy'-'MM'-'dd") : DateTime.Now.AddDays(-1).ToString("yyyy'-'MM'-'dd"))"><</a>
+    <h1>Match on day: @(Model.Date != null ? Model.Date.Value.ToString("yyyy'-'MM'-'dd") : DateTime.Now.ToString("yyyy'-'MM'-'dd"))</h1>
+    <a class="date-picker-arrow" asp-page="./Index" asp-route-date="@(Model.Date != null ? Model.Date.Value.AddDays(1).ToString("yyyy'-'MM'-'dd") : DateTime.Now.AddDays(1).ToString("yyyy'-'MM'-'dd"))">></a>
+</div>
+
+@if(Model.Games.Count == 0 || Model.Games is null)
+{
+    <div class="container-fluid">
+        <h1>No games today 🌝</h1>
+    </div>
+}
+else
+{
+    <div id="carouselIndexGameControls" class="carousel" data-bs-ride="carousel">
+        <div class="carousel-inner">
+            @foreach (var (value, i) in Model.Games.Select((value, i) => ( value, i )))
+            {
+                if (i == 0)
+                {
+                    <div class="carousel-item active">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="card-header">
+                                    <img class="card-team-logo card-team-logo-left" src="@value?.HomeTeamDto?.WikipediaLogoUrl" alt="HomeTeamLogo"/>
+                                    <h1 class="card-title">@value.HomeTeam vs @value.AwayTeam</h1>
+                                    <img class="card-team-logo card-team-logo-right" src="@value?.AwayTeamDto?.WikipediaLogoUrl" alt="AwayTeamLogo"/>
+                                </div>
+                                <div class="card-text">
+                                    @if (value.Status == "Scheduled")
+                                    {
+                                        <h1>0 : 0</h1>
+                                    }
+                                    else
+                                    {
+                                        <h1>@value.HomeTeamScore : @value.AwayTeamScore</h1>
+                                    }
+                                    <h2>@DateTime.SpecifyKind(value.DateTimeUtc.Value, DateTimeKind.Local).ToString("ddd, dd MMM HH':'mm")</h2>
+                                    <h2>@value.Status</h2>
+                                </div>
+                                <a href="#" class="btn btn-primary">See Details</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    <div class="carousel-item">
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="card-header">
+                                    <img class="card-team-logo" src="@value?.HomeTeamDto?.WikipediaLogoUrl">
+                                    <h1 class="card-title">@value.HomeTeam vs @value.AwayTeam</h1>
+                                    <img class="card-team-logo" src="@value?.AwayTeamDto?.WikipediaLogoUrl">
+                                </div>
+
+                                <div class="card-text">
+                                    @if (value.Status == "Scheduled")
+                                    {
+                                        <h1>0 : 0</h1>
+                                    }
+                                    else
+                                    {
+                                        <h1>@value.HomeTeamScore : @value.AwayTeamScore</h1>
+                                    }
+                                    <h2>@DateTime.SpecifyKind(value.DateTimeUtc.Value, DateTimeKind.Local).ToString("ddd, dd MMM HH':'mm")</h2>
+                                    <h2>@value.Status</h2>
+                                </div>
+                                <a href="#" class="btn btn-primary">See Details</a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            }
+        <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev">
+            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Previous</span>
+        </button>
+        <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next">
+            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+            <span class="visually-hidden">Next</span>
+        </button>
+        </div>
+    </div>
+}
+
+
+@* // *@
+@* // <div id="carouselExampleControls" class="carousel" data-bs-ride="carousel"> *@
+@* //     <div class="carousel-inner"> *@
+@* //         <div class="carousel-item active"> *@
+@* //             <div class="card"> *@
+@* //                 <div class="card-body"> *@
+@* //                     <h1 class="card-title">@Model._gameDto.HomeTeam vs @Model._gameDto.AwayTeam</h1> *@
+@* //                     <div class="card-text"> *@
+@* //                             <h1>@Model._gameDto.AwayTeamScore : @Model._gameDto.AwayTeamScore</h1> *@
+@* //                             <h2>@Model._gameDto.DateTimeUtc</h2> *@
+@* //                             <h2>@Model._gameDto.Status</h2> *@
+@* //                     </div> *@
+@* //                     <a href="#" class="btn btn-primary">See Details</a> *@
+@* //                 </div> *@
+@* //             </div> *@
+@* //         </div> *@
+@* //         <div class="carousel-item"> *@
+@* //             <div class="card"> *@
+@* //                 <div class="card-body"> *@
+@* //                     <h1 class="card-title">@Model._gameDto.HomeTeam vs @Model._gameDto.AwayTeam</h1> *@
+@* //                     <div class="card-text"> *@
+@* //                             <h1>@Model._gameDto.AwayTeamScore : @Model._gameDto.AwayTeamScore</h1> *@
+@* //                             <h2>@Model._gameDto.DateTimeUtc</h2> *@
+@* //                             <h2>@Model._gameDto.Status</h2> *@
+@* //                     </div> *@
+@* //                     <a href="#" class="btn btn-primary">See Details</a> *@
+@* //                 </div> *@
+@* //             </div> *@
+@* //         </div> *@
+@* //         <div class="carousel-item"> *@
+@* //             <div class="card"> *@
+@* //                 <div class="img-wrapper"><img src="..." class="d-block w-100" alt="..."> </div> *@
+@* //                 <div class="card-body"> *@
+@* //                     <h5 class="card-title">Card title 3</h5> *@
+@* //                     <p class="card-text">Some quick example text to build on the card title and make up the bulk of the *@
+@* //                         card's content.</p> *@
+@* //                     <a href="#" class="btn btn-primary">See Details</a> *@
+@* //                 </div> *@
+@* //             </div> *@
+@* //         </div> *@
+@* //         <div class="carousel-item"> *@
+@* //             <div class="card"> *@
+@* //                <div class="card-body"> *@
+@* //                     <h1 class="card-title">@Model._gameDto.HomeTeam vs @Model._gameDto.AwayTeam</h1> *@
+@* //                     <div class="card-text"> *@
+@* //                             <h1>@Model._gameDto.AwayTeamScore : @Model._gameDto.AwayTeamScore</h1> *@
+@* //                             <h2>@Model._gameDto.DateTimeUtc</h2> *@
+@* //                             <h2>@Model._gameDto.Status</h2> *@
+@* //                     </div> *@
+@* //                     <a href="#" class="btn btn-primary">See Details</a> *@
+@* //                 </div> *@
+@* //             </div> *@
+@* //         </div> *@
+@* //         <div class="carousel-item"> *@
+@* //             <div class="card"> *@
+@* //                <div class="card-body"> *@
+@* //                     <h1 class="card-title">@Model._gameDto.HomeTeam vs @Model._gameDto.AwayTeam</h1> *@
+@* //                     <div class="card-text"> *@
+@* //                             <h1>@Model._gameDto.AwayTeamScore : @Model._gameDto.AwayTeamScore</h1> *@
+@* //                             <h2>@Model._gameDto.DateTimeUtc</h2> *@
+@* //                             <h2>@Model._gameDto.Status</h2> *@
+@* //                     </div> *@
+@* //                     <a href="#" class="btn btn-primary">See Details</a> *@
+@* //                 </div> *@
+@* //             </div> *@
+@* //         </div> *@
+@* //         <div class="carousel-item"> *@
+@* //             <div class="card"> *@
+@* //                <div class="card-body"> *@
+@* //                     <h1 class="card-title">@Model._gameDto.HomeTeam vs @Model._gameDto.AwayTeam</h1> *@
+@* //                     <div class="card-text"> *@
+@* //                             <h1>@Model._gameDto.AwayTeamScore : @Model._gameDto.AwayTeamScore</h1> *@
+@* //                             <h2>@Model._gameDto.DateTimeUtc</h2> *@
+@* //                             <h2>@Model._gameDto.Status</h2> *@
+@* //                     </div> *@
+@* //                     <a href="#" class="btn btn-primary">See Details</a> *@
+@* //                 </div> *@
+@* //             </div> *@
+@* //         </div> *@
+@* //         <div class="carousel-item"> *@
+@* //             <div class="card"> *@
+@* //                <div class="card-body"> *@
+@* //                     <h1 class="card-title">@Model._gameDto.HomeTeam vs @Model._gameDto.AwayTeam</h1> *@
+@* //                     <div class="card-text"> *@
+@* //                             <h1>@Model._gameDto.AwayTeamScore : @Model._gameDto.AwayTeamScore</h1> *@
+@* //                             <h2>@Model._gameDto.DateTimeUtc</h2> *@
+@* //                             <h2>@Model._gameDto.Status</h2> *@
+@* //                     </div> *@
+@* //                     <a href="#" class="btn btn-primary">See Details</a> *@
+@* //                 </div> *@
+@* //             </div> *@
+@* //         </div> *@
+@* //         <div class="carousel-item"> *@
+@* //             <div class="card"> *@
+@* //                <div class="card-body"> *@
+@* //                     <h1 class="card-title">@Model._gameDto.HomeTeam vs @Model._gameDto.AwayTeam</h1> *@
+@* //                     <div class="card-text"> *@
+@* //                             <h1>@Model._gameDto.AwayTeamScore : @Model._gameDto.AwayTeamScore</h1> *@
+@* //                             <h2>@Model._gameDto.DateTimeUtc</h2> *@
+@* //                             <h2>@Model._gameDto.Status</h2> *@
+@* //                     </div> *@
+@* //                     <a href="#" class="btn btn-primary">See Details</a> *@
+@* //                 </div> *@
+@* //             </div> *@
+@* //         </div> *@
+@* //         <div class="carousel-item"> *@
+@* //             <div class="card"> *@
+@* //                <div class="card-body"> *@
+@* //                     <div class="card-title">@Model._gameDto.HomeTeam vs @Model._gameDto.AwayTeam</div> *@
+@* //                     <div class="card-text"> *@
+@* //                             <h1>@Model._gameDto.AwayTeamScore : @Model._gameDto.AwayTeamScore</h1> *@
+@* //                             <h2>@Model._gameDto.DateTimeUtc</h2> *@
+@* //                             <h2>@Model._gameDto.Status</h2> *@
+@* //                     </div> *@
+@* //                     <a href="#" class="btn btn-primary">See Details</a> *@
+@* //                 </div> *@
+@* //             </div> *@
+@* //         </div> *@
+@* //     </div> *@
+@* //     <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="prev"> *@
+@* //         <span class="carousel-control-prev-icon" aria-hidden="true"></span> *@
+@* //         <span class="visually-hidden">Previous</span> *@
+@* //     </button> *@
+@* //     <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleControls" data-bs-slide="next"> *@
+@* //         <span class="carousel-control-next-icon" aria-hidden="true"></span> *@
+@* //         <span class="visually-hidden">Next</span> *@
+@* //     </button> *@
+@* // </div> *@

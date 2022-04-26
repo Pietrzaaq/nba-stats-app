@@ -1,0 +1,122 @@
+html {
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  html {
+    font-size: 16px;
+  }
+}
+
+html {
+  position: relative;
+  min-height: 100%;
+}
+
+body {
+  margin-bottom: 60px;
+}
+
+.logo {
+  width: 2rem;
+}
+
+.date-picker{
+  padding: 0 1rem;
+  font-size: 3rem;
+  color: white;
+  border: 2px solid #0a58ca;
+  background-color: #0b5ed7;
+  display: flex;
+  text-align: center;
+  align-items: center;
+  align-content: space-around;
+  flex-wrap: nowrap;
+  flex-direction: row;
+}
+
+.date-picker-arrow, .date-picker-arrow:hover
+{
+  color: white;
+  text-decoration: none;
+  margin: auto;
+}
+
+
+.carousel-inner {
+  padding: 1rem;
+  position: static;
+  width: 100%;
+  overflow: hidden;
+}
+
+.card {
+  text-align: center;
+  padding-top: 1rem;
+  padding-bottom: 1rem;
+  margin: 0 0.5em;
+  box-shadow: 2px 6px 8px 0 rgba(22, 22, 26, 0.18);
+  border: none;
+}
+.carousel-control-prev,
+.carousel-control-next {
+  background-color: #e1e1e1;
+  width: 6vh;
+  height: 6vh;
+  border-radius: 50%;
+  top: 50%;
+  transform: translateY(-50%);
+}
+@media (min-width: 768px) {
+  .carousel-item {
+    margin-right: 0;
+    flex: 0 0 33.333333%;
+    display: block;
+  }
+  .carousel-inner {
+    display: flex;
+  }
+}
+
+.card-header{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  align-content: space-around;
+  flex-wrap: nowrap;
+  flex-direction: row;
+  border: 3px dashed black;
+}
+
+.card .img-wrapper {
+  max-width: 100%;
+  height: 13em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.card-team-logo
+{
+  width: 2rem;
+  margin: auto;
+  max-height: 3rem;
+}
+
+.card-title{
+  font-size: 2rem;
+  margin-left: auto;
+  margin-right: auto;
+  clear: both;
+  display: inline-block;
+  overflow: hidden;
+  white-space: nowrap;
+  margin-bottom: 0.5rem;
+  text-align: center;
+}
+
+@media (max-width: 767px) {
+  .card .img-wrapper {
+    height: 17em;
+  }
+}
