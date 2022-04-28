@@ -7,23 +7,25 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NbaStats.Worker.Jobs;
+using NbaStats.Worker.Models;
 using Quartz;
 using Quartz.Impl;
+using Serilog;
 
 namespace NbaStats.Worker
 {
     public class DataService : BackgroundService
     {
         private readonly IConfiguration _configuration;
-        private readonly ILogger<DataService> _logger;
         private readonly IScheduler _scheduler;
         private static HttpClient _client;
+        private static bool _tablesInitialized;
         
         public DataService(IConfiguration configuration, ILogger<DataService> logger)
         {
             //Get services and configure scheduler
             _configuration = configuration;
-            _logger = logger;
+            _tablesInitialized = false;
             NameValueCollection props = new NameValueCollection
             {
                 { "quartz.serializer.type", "binary" },
@@ -40,6 +42,32 @@ namespace NbaStats.Worker
             //Initialize static instance of HttpClient
             _client = new HttpClient();
             
+            //Run the function which initialize tables or check if its already initialized
+            try
+            {
+                _tablesInitialized = InitializeTables();
+                if (!_tablesInitialized)
+                {
+                    return StopAsync(cancellationToken);
+                }
+            }
+            catch (Exception e)
+            {
+                Log.Error(e,"Error occured while initializing tables");
+                throw;
+            }
+            
+            //Run the function which initializes scheduler
+            try
+            {
+                StartScheduler();
+            }
+            catch (Exception e)
+            {
+                Log.Error(e,"Error occured while initializing scheduler");
+                throw;
+            }
+            
             return base.StartAsync(cancellationToken);
         }
 
@@ -50,40 +78,43 @@ namespace NbaStats.Worker
             return base.StopAsync(cancellationToken);
         }
         
-        protected override Task ExecuteAsync(CancellationToken stoppingToken)
+        protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
-            _logger.LogInformation("Starting the Quartz Scheduler");
-            
-            try
+            while (!stoppingToken.IsCancellationRequested)
             {
-                StartScheduler();
+                Log.Information("Quartz Scheduler is running");
+                
+                try
+                {
+                    await Task.Delay(5000);
+                }
+                catch (OperationCanceledException)
+                {
+                    return;
+                }
             }
-            catch (Exception e)
-            {
-                _logger.LogError(e,"Error occured while starting the Quartz Scheduler");
-                throw;
-            }
-
-            var currentJobs = _scheduler.GetCurrentlyExecutingJobs().Result;
-            _scheduler.GetTrigger(new TriggerKey("InitTeamsAndPlayersJob"));
-            _scheduler.GetTrigger(new TriggerKey("InitTeamsTrigger"));
-            
-            return Task.CompletedTask;
         }
+
+        public bool InitializeTables()
+        {
+            bool isTeamsAndPlayersInitialized = new InitTeamsAndPlayersJob().Execute().Result;
+
+            bool isGamesInitialized = new InitGamesForSeasonJob().Execute().Result;
+
+            return isTeamsAndPlayersInitialized && isGamesInitialized;
+        }
+        
 
         public void StartScheduler()
         {
             _scheduler.Start().ConfigureAwait(false).GetAwaiter().GetResult();
-
-            //Schedule jobs
+            
             ScheduleExampleJob();
-            ScheduleInitTeamsAndPlayersJob();
-            ScheduleInitGamesJob();
         }
         
         public void StopScheduler()
         {
-            _logger.LogInformation("Stopping scheduler...");
+            Log.Information("Stopping scheduler...");
             _scheduler.Shutdown().ConfigureAwait(false).GetAwaiter().GetResult();
         }
         
@@ -107,59 +138,60 @@ namespace NbaStats.Worker
                 .Build();
             
             _scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
-            _logger.LogInformation("ExampleJob has been scheduled");
+            Log.Information("ExampleJob has been scheduled");
         }
 
-        public void ScheduleInitTeamsAndPlayersJob()
-        {
-            var jobData = new JobDataMap();
-            jobData.Put("httpClient", _client);
-            jobData.Put("configuration", _configuration);
-
-            IJobDetail job = JobBuilder.Create<InitTeamsAndPlayersJob>()
-                .UsingJobData(jobData)
-                .WithIdentity("InitTeamsAndPlayersJob", "InitGroup")
-                .Build();
-            
-            var trigger = TriggerBuilder.Create()
-                .WithIdentity("InitTeamsTrigger", "InitGroup")
-                .WithSimpleSchedule(x => x
-                    .WithRepeatCount(0)
-                    .WithIntervalInSeconds(10)
-                )
-                .StartAt(DateTimeOffset.Now.AddSeconds(10))
-                .Build();
-            
-            _scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
-            _logger.LogInformation("InitTeamsAndPlayersJob has been scheduled");
-        }
+        // public void ScheduleInitTeamsAndPlayersJob()
+        // {
+        //     var jobData = new JobDataMap();
+        //     jobData.Put("httpClient", _client);
+        //     jobData.Put("configuration", _configuration);
+        //
+        //     _teamInitJobDetail = JobBuilder.Create<InitTeamsAndPlayersJob>()
+        //         .UsingJobData(jobData)
+        //         .WithIdentity("InitTeamsAndPlayersJob", "InitGroup")
+        //         .Build();
+        //
+        //     // var trigger = TriggerBuilder.Create()
+        //     //     .WithIdentity("InitTeamsTrigger", "InitGroup")
+        //     //     .WithSimpleSchedule(x => x
+        //     //         .WithRepeatCount(0)
+        //     //         .WithIntervalInSeconds(10)
+        //     //     )
+        //     //     .StartAt(DateTimeOffset.Now.AddSeconds(10))
+        //     //     .Build();
+        //     //
+        //     // _scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
+        //     Log.Information("InitTeamsAndPlayersJob has been scheduled");
+        // }
         
-        public void ScheduleInitGamesJob()
-        {
-            //Use JobDataMap function to pass object to Job instances
-            var jobData = new JobDataMap();
-            jobData.Put("httpClient", _client);
-            jobData.Put("configuration", _configuration);
-
-            //Build job and assign it to the group
-            IJobDetail job = JobBuilder.Create<InitGamesForSeasonJob>()
-                .UsingJobData(jobData)
-                .WithIdentity("InitGamesJob", "InitGroup")
-                .Build();
-            
-            //Create trigger for the job and set interval 
-            var trigger = TriggerBuilder.Create()
-                .WithIdentity("InitGamesTrigger", "InitGroup")
-                .WithSimpleSchedule(x => x
-                    .WithRepeatCount(0)
-                    .WithIntervalInSeconds(10)
-                )
-                .StartAt(DateTimeOffset.Now.AddSeconds(30))
-                .Build();
-            
-            _scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
-            _logger.LogInformation("InitTeamsAndPlayersJob has been scheduled");
-        }
+        // public void ScheduleInitGamesJob()
+        // {
+        //     //Use JobDataMap function to pass object to Job instances
+        //     var jobData = new JobDataMap();
+        //     jobData.Put("httpClient", _client);
+        //     jobData.Put("configuration", _configuration);
+        //
+        //     //Build job and assign it to the group
+        //     IJobDetail job = JobBuilder.Create<InitGamesForSeasonJob>()
+        //         .UsingJobData(jobData)
+        //         .WithIdentity("InitGamesJob", "InitGroup")
+        //         .Build();
+        //
+        //     // //Create trigger for the job and set interval 
+        //     // var trigger = TriggerBuilder.Create()
+        //     //     .WithIdentity("InitGamesTrigger", "InitGroup")
+        //     //     .WithSimpleSchedule(x => x
+        //     //         .WithRepeatCount(0)
+        //     //         .WithIntervalInSeconds(10)
+        //     //     )
+        //     //     .StartAt(DateTimeOffset.Now.AddSeconds(30))
+        //     //     .Build();
+        //     //
+        //     // _scheduler.ScheduleJob(job, trigger).ConfigureAwait(false).GetAwaiter().GetResult();
+        //     
+        //     Log.Information("InitTeamsAndPlayersJob has been prepared");
+        // }
 
     }
 }

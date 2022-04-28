@@ -14,7 +14,7 @@ using Serilog;
 
 namespace NbaStats.Worker.Jobs
 {
-    sealed class InitGamesForSeasonJob: IJob
+    sealed class InitGamesForSeasonJob
     {
         private List<Game> _games;
         
@@ -25,7 +25,7 @@ namespace NbaStats.Worker.Jobs
             _games = new List<Game>();
         }
 
-        public async Task Execute(IJobExecutionContext context)
+        public async Task<bool> Execute()
         {
             Log.Information("InitGamesForSeasonJob starting..."); 
             
@@ -37,10 +37,15 @@ namespace NbaStats.Worker.Jobs
             using (var ctx = new NbaDatabaseContext())
             {
                 //Check if there is no games in database and teams table is initialized
-                if (ctx.Games.Any() || !ctx.Teams.Any())
+                if (ctx.Games.Any())
                 {
-                    Log.Information("Games table is not empty or teams table is not initialized");
-                    return;
+                    Log.Information("Games table is already initialized");
+                    return true;
+                }
+                if (!ctx.Teams.Any())
+                {
+                    Log.Information("Teams table is not initialized");
+                    return true;
                 }
             }
             
@@ -56,7 +61,7 @@ namespace NbaStats.Worker.Jobs
             JArray jsonGamesList = (JArray) JsonConvert.DeserializeObject(jsonGamesString)!;
             
             //Check if the list has any values
-            if(!jsonGamesList.HasValues) {return;}
+            if(!jsonGamesList.HasValues) {return false;}
             
             //Start function which takes list of games and added it to the global list for every game
             bool executedSuccessfully  = MapGamesFromJson(jsonGamesList);
@@ -90,10 +95,12 @@ namespace NbaStats.Worker.Jobs
                 }
                 
                 Log.Information("InitGamesJob executed correctly");
+                return true;
             }
             else
             {
                 Log.Error("InitGamesJob have finished with error");
+                return false;
             }
         }
 

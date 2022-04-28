@@ -1,11 +1,4 @@
-﻿using System;
-using System.Linq;
-using Microsoft.Data.SqlClient;
-using Microsoft.Extensions.Configuration;
-using Dapper;
-using NbaStats.Domain.Entities;
-
-
+﻿using Microsoft.Extensions.Configuration;
 
 namespace NbaStats.Worker.Models
 {
@@ -22,17 +15,6 @@ namespace NbaStats.Worker.Models
         public string GetConnectionString()
         {
             return _configuration[$"database:{nameof(DatabaseOptions.ConnectionString)}"];
-        }
-
-        public void GetGames()
-        {
-            string sql = "SELECT * FROM StatsManagement.Games";
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                connection.Open();
-
-                var games = connection.Query<Game>(sql);
-            }
         }
     }
 }

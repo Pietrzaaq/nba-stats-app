@@ -15,7 +15,7 @@ using Serilog;
 
 namespace NbaStats.Worker.Jobs
 {
-    sealed class InitTeamsAndPlayersJob : IJob
+    sealed class InitTeamsAndPlayersJob 
     {
         private  List<Team> _teams;
         private  List<Player> _players;
@@ -32,14 +32,14 @@ namespace NbaStats.Worker.Jobs
             _players = new List<Player>();
         }
         
-        public async Task Execute(IJobExecutionContext context)
+        public async Task<bool> Execute()
         {
             Log.Information("InitTeamJob starting...");
             
-            //Map the data from job detail
-            JobDataMap dataMap = context.MergedJobDataMap;
-            client = (HttpClient) dataMap["httpClient"];
-            configuration = (IConfiguration) dataMap["configuration"];
+            // //Map the data from job detail
+            // JobDataMap dataMap = context.MergedJobDataMap;
+            // client = (HttpClient) dataMap["httpClient"];
+            // configuration = (IConfiguration) dataMap["configuration"];
             
             //Check if teams and players table is empty in the database
             using (var ctx = new NbaDatabaseContext())
@@ -47,7 +47,7 @@ namespace NbaStats.Worker.Jobs
                 if (ctx.Teams.Any() && ctx.Players.Any())
                 {
                     Log.Information("Teams and players table are already initialized");
-                    return;
+                    return true;
                 }
             }
             
@@ -71,7 +71,7 @@ namespace NbaStats.Worker.Jobs
             JArray jsonTeamList = (JArray) JsonConvert.DeserializeObject(jsonTeamsString)!;
             
             //Check if the list has any values
-            if(!jsonTeamList.HasValues) {return;}
+            if(!jsonTeamList.HasValues) {return false;}
 
             // var first = jsonTeamList.First;
             // var last = jsonTeamList.Last;
@@ -111,10 +111,12 @@ namespace NbaStats.Worker.Jobs
                     throw;
                 }
                 Log.Information("InitTeamsAndPlayersJob executed correctly");
+                return true;
             }
             else
             {
                 Log.Error("InitTeamsAndPlayersJob have finished with error");
+                return false;
             }
         }
 
